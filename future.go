@@ -87,7 +87,7 @@ type deferError struct {
 	err        error
 	errCh      chan error
 	responded  bool
-	ShutdownCh chan struct{}
+	shutdownCh chan struct{}
 }
 
 func (d *deferError) init() {
@@ -106,7 +106,7 @@ func (d *deferError) Error() error {
 	}
 	select {
 	case d.err = <-d.errCh:
-	case <-d.ShutdownCh:
+	case <-d.shutdownCh:
 		d.err = ErrRaftShutdown
 	}
 	return d.err

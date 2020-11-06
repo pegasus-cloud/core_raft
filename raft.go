@@ -104,6 +104,7 @@ func (r *Raft) setLeader(leader ServerAddress) {
 // configuration change requests. 'req' describes the change. For timeout,
 // see AddVoter.
 func (r *Raft) requestConfigChange(req configurationChangeRequest, timeout time.Duration) IndexFuture {
+	fmt.Println("requestConfigChange")
 	var timer <-chan time.Time
 	if timeout > 0 {
 		timer = time.After(timeout)
@@ -114,10 +115,13 @@ func (r *Raft) requestConfigChange(req configurationChangeRequest, timeout time.
 	future.init()
 	select {
 	case <-timer:
+		fmt.Println("1111")
 		return errorFuture{ErrEnqueueTimeout}
 	case r.configurationChangeCh <- future:
+		fmt.Println("22222")
 		return future
 	case <-r.shutdownCh:
+		fmt.Println("3333")
 		return errorFuture{ErrRaftShutdown}
 	}
 }
@@ -737,6 +741,7 @@ func (r *Raft) leaderLoop() {
 				future.respond(ErrLeadershipTransferInProgress)
 				continue
 			}
+			fmt.Println("future := <-r.configurationChangeChIfStable()")
 			r.appendConfigurationEntry(future)
 
 		case b := <-r.bootstrapCh:
@@ -863,6 +868,8 @@ func (r *Raft) leadershipTransfer(id ServerID, address ServerAddress, repl *foll
 	}
 	doneCh <- err
 }
+
+var b = true
 
 // checkLeaderLease is used to check if we can contact a quorum of nodes
 // within the last leader lease interval. If not, we need to step down,
@@ -996,7 +1003,7 @@ func (r *Raft) restoreUserSnapshot(meta *SnapshotMeta, reader io.Reader) error {
 	// Restore the snapshot into the FSM. If this fails we are in a
 	// bad state so we panic to take ourselves out.
 	fsm := &restoreFuture{ID: sink.ID()}
-	fsm.ShutdownCh = r.shutdownCh
+	fsm.shutdownCh = r.shutdownCh
 	fsm.init()
 	select {
 	case r.fsmMutateCh <- fsm:
@@ -1591,7 +1598,7 @@ func (r *Raft) installSnapshot(rpc RPC, req *InstallSnapshotRequest) {
 
 	// Restore snapshot
 	future := &restoreFuture{ID: sink.ID()}
-	future.ShutdownCh = r.shutdownCh
+	future.shutdownCh = r.shutdownCh
 	future.init()
 	select {
 	case r.fsmMutateCh <- future:

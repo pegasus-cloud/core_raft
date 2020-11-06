@@ -140,12 +140,14 @@ RPC:
 	for !shouldStop {
 		select {
 		case maxIndex := <-s.stopCh:
+			fmt.Println("maxIndex := <-s.stopCh")
 			// Make a best effort to replicate up to this index
 			if maxIndex > 0 {
 				r.replicateTo(s, maxIndex)
 			}
 			return
 		case deferErr := <-s.triggerDeferErrorCh:
+			fmt.Println("deferErr := <-s.triggerDeferErrorCh")
 			lastLogIdx, _ := r.getLastLog()
 			shouldStop = r.replicateTo(s, lastLogIdx)
 			if !shouldStop {
@@ -154,6 +156,7 @@ RPC:
 				deferErr.respond(fmt.Errorf("replication failed"))
 			}
 		case <-s.triggerCh:
+			fmt.Println("<-s.triggerCh")
 			lastLogIdx, _ := r.getLastLog()
 			shouldStop = r.replicateTo(s, lastLogIdx)
 		// This is _not_ our heartbeat mechanism but is to ensure
@@ -162,6 +165,7 @@ RPC:
 		// can't do this to keep them unblocked by disk IO on the
 		// follower. See https://github.com/hashicorp/raft/issues/282.
 		case <-randomTimeout(r.conf.CommitTimeout):
+			fmt.Println("<-randomTimeout(r.conf.CommitTimeout)")
 			lastLogIdx, _ := r.getLastLog()
 			shouldStop = r.replicateTo(s, lastLogIdx)
 		}

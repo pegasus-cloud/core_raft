@@ -1013,6 +1013,8 @@ func (r *Raft) Stats() map[string]string {
 	lastLogIndex, lastLogTerm := r.getLastLog()
 	lastSnapIndex, lastSnapTerm := r.getLastSnapshot()
 	s := map[string]string{
+		"local_id":             string(r.localID),
+		"local_address":        string(r.localAddr),
 		"state":                r.getState().String(),
 		"term":                 toString(r.getCurrentTerm()),
 		"last_log_index":       toString(lastLogIndex),

@@ -2,6 +2,7 @@ package raft
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 )
 
@@ -56,6 +57,13 @@ func (i *InmemStore) GetLog(index uint64, log *Log) error {
 
 // StoreLog implements the LogStore interface.
 func (i *InmemStore) StoreLog(log *Log) error {
+	fmt.Println()
+	fmt.Println("Index", log.Index)
+	fmt.Println("Term", log.Term)
+	fmt.Println("Type", log.Type)
+	fmt.Println("Data", string(log.Data))
+	fmt.Println("Extensions", log.Extensions)
+	fmt.Println()
 	return i.StoreLogs([]*Log{log})
 }
 
@@ -97,6 +105,9 @@ func (i *InmemStore) DeleteRange(min, max uint64) error {
 
 // Set implements the StableStore interface.
 func (i *InmemStore) Set(key []byte, val []byte) error {
+	fmt.Println()
+	fmt.Println("InmemStore Set Key: ", string(key), " ,Val: ", string(val))
+	fmt.Println()
 	i.l.Lock()
 	defer i.l.Unlock()
 	i.kv[string(key)] = val

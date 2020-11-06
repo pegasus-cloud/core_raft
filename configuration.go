@@ -1,6 +1,8 @@
 package raft
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ServerSuffrage determines whether a Server in a Configuration gets a vote.
 type ServerSuffrage int
